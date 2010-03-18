@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <drawable name="active_color">#00ff00</drawable>
+    <drawable name="frozen_color">#ffff00</drawable>
+    <drawable name="inactive_color">#ff0000</drawable>
+    <drawable name="connecting_color">#ffffff</drawable>
+</resources>
