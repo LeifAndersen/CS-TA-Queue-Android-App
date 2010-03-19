@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="state_button_width">80sp</dimen>
+    <dimen name="state_button_height">40sp</dimen>
+    <dimen name="remove_button_width">80sp</dimen>
+    <dimen name="remove_button_height">40sp</dimen>
+
+</resources>
