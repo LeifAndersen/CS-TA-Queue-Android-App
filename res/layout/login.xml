@@ -44,6 +44,14 @@
         android:password="true"
         android:maxLines="1"
         />
+    <CheckBox
+        android:id="@+id/saveCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@id/passwordInput"
+        android:text="@string/save_login"
+        />
     <Button
         android:id="@+id/loginButton"
         android:layout_width="wrap_content"

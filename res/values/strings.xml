@@ -13,4 +13,5 @@
     <string name="section">Section:</string>
     <string name="login_header">CS TA Queue login</string>
     <string name="login_button_txt">Connect</string>
+    <string name="save_login">Save Login</string>
 </resources>
