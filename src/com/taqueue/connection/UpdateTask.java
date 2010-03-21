@@ -26,18 +26,20 @@ public class UpdateTask extends AsyncTask<Void,String,Void>{
         private QueueConnectionManager manager;
         private TAQueueActivity activity;
         private TAQueue queue;
-        public UpdateTask(TAQueueActivity act,QueueConnectionManager m, TAQueue queue){
+        private boolean loopForever;
+        public UpdateTask(TAQueueActivity act,QueueConnectionManager m, TAQueue queue,boolean loopForever){
                 manager = m;
                 activity = act;
                 this.queue = queue;
+                this.loopForever = loopForever;
         }
         @Override
         /**
          * Send update requests and then sleep and repeat untill killed
          */
         protected Void doInBackground(Void... v){
-                //keep on updating, we'll get killed when we are done D:
-                while(true){
+                //update, if loopForever is true this will run until killed by the activity, otherwise it will just run once
+                do{
                         String message;
                         ConnectionResult res = manager.update();
                         if(res.status == ConnectionStatus.OK)
@@ -47,7 +49,8 @@ public class UpdateTask extends AsyncTask<Void,String,Void>{
                         publishProgress(message);
                         //sleep for 2.5 seconds then do it again :D
                         SystemClock.sleep(2500);
-                }
+                }while(loopForever);
+                return null;
         }
         /**
          * Called whenever we get a new update from the queue, this passes it up to the activity for displaying

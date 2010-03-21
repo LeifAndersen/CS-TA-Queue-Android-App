@@ -136,7 +136,7 @@ public class TAQueueActivity extends ListActivity
                         queue = (TAQueue) savedInstanceState.getSerializable("Queue");
                         
                         //spawn the update task
-                        updater = new UpdateTask(this,manager,queue);
+                        updater = new UpdateTask(this,manager,queue,true);
                         updater.execute();
                         //finally, update the display based on our saved values
                         this.doUpdate();
@@ -165,7 +165,7 @@ public class TAQueueActivity extends ListActivity
         public void onResume(){
                 //if the connection is good then start updating again
                 if(manager.isConnected()){
-                        updater = new UpdateTask(this,manager,queue);
+                        updater = new UpdateTask(this,manager,queue,true);
                         updater.execute();
                 }
                 super.onResume();
@@ -194,30 +194,45 @@ public class TAQueueActivity extends ListActivity
                 String machine = machineView.getText().toString().split(machineStr,2)[1];
                 //spawn a task to do the remove
                 new RemoveTask(manager,name,machine).execute();
+                //force a single update
+                updater = new UpdateTask(this,manager,queue,false);
+                updater.execute();
         }
         /**
          * Called when the user presses the Activate button, activates the queue if the queue is connected
          */
         public void onActivateClick(View v){
                 //only try to activate if the connection is ok
-                if(manager.isConnected())
+                if(manager.isConnected()){
                         manager.activate();
+                        //force a single update
+                        updater = new UpdateTask(this,manager,queue,false);
+                        updater.execute();
+                }
         }
         /**
          * Called when the user presses the Freeze buttons, freezes the queue if the queue is connected
          */
         public void onFreezeClick(View v){
                 //only try to freeze if the connection is ok
-                if(manager.isConnected())
+                if(manager.isConnected()){
                         manager.freeze();
+                        //force a single update
+                        updater = new UpdateTask(this,manager,queue,false);
+                        updater.execute();
+                }
         }
         /**
          * Called when the user presses the Deactivate buttons, deactivates the queue if the queue is connected
          */
         public void onDeactivateClick(View v){
                 //only try to deactivate if the connection is ok
-                if(manager.isConnected())
+                if(manager.isConnected()){
                         manager.deactivate();
+                        //force a single update
+                        updater = new UpdateTask(this,manager,queue,false);
+                        updater.execute();
+                }
         }
         /**
          * Called when the user clicks the "Connect" button in the login screen
@@ -300,7 +315,8 @@ public class TAQueueActivity extends ListActivity
                         TextView statusView = (TextView) findViewById(R.id.status);
                         setContentView(R.layout.queue);
                         queue.setSection(manager.getSection());
-                        updater = new UpdateTask(this,manager,queue);
+                        //spawn an updater that updates forever
+                        updater = new UpdateTask(this,manager,queue,true);
                         updater.execute();
                 }else if(status == ConnectionStatus.BAD_PASSWORD){
                         //show a bad password alert
