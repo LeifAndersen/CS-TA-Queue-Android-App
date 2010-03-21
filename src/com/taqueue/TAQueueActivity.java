@@ -21,6 +21,9 @@ import android.os.Bundle;
 import android.widget.SimpleAdapter;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.EditText;
+import android.widget.CheckBox;
+import android.content.SharedPreferences;
 import android.view.View;
 import com.taqueue.connection.*;
 import android.os.SystemClock;
@@ -46,6 +49,11 @@ public class TAQueueActivity extends ListActivity
         public static final int DIALOG_CONNECTING = 0;
         public static final int DIALOG_BAD_LOGIN = 1;
         public static final int DIALOG_CONNECTION_ERROR=2;
+
+        /**
+         * File where preferences will be saved
+         */
+        private static final String PREFS="TAQueuePrefs";
         /**
          * Dialog showing the "please wait" while connecting, will be dismissed once the connectTask finishes
          */
@@ -137,6 +145,20 @@ public class TAQueueActivity extends ListActivity
                         queue = new TAQueue();
                         setContentView(R.layout.login);
 
+                        //load the saved section/password
+                        SharedPreferences settings = getSharedPreferences(PREFS,0);
+                        String section = settings.getString("section","");
+                        String password = settings.getString("password","");
+                        //load if the save login check box is checked
+                        boolean isSaveChecked = settings.getBoolean("saveChecked",false);
+                        ((CheckBox)findViewById(R.id.saveCheckBox)).setChecked(isSaveChecked);
+                        //and set the EditText's text
+                        EditText sectionText = (EditText) findViewById(R.id.sectionInput);
+                        EditText passwordText = (EditText) findViewById(R.id.passwordInput);
+                        sectionText.setText(section);
+                        passwordText.setText(password);
+
+
                 }
 
         }
@@ -204,6 +226,15 @@ public class TAQueueActivity extends ListActivity
                 //get the login info
                 String section = ((TextView)findViewById(R.id.sectionInput)).getText().toString();
                 String password = ((TextView)findViewById(R.id.passwordInput)).getText().toString();
+                //save the section/password to the preferences if the user wants, otherwise save "" for both
+                boolean save = ((CheckBox)findViewById(R.id.saveCheckBox)).isChecked();
+                SharedPreferences settings = getSharedPreferences(PREFS,0);
+                SharedPreferences.Editor editor = settings.edit();
+                editor.putString("section", (save ? section : ""));
+                editor.putString("password", (save ? password : ""));
+                editor.putBoolean("saveChecked",save);
+                //and save the settings
+                editor.commit();
                 //spawn a connect task
                 new ConnectTask(this,manager,section,password).execute();
                 //and spawn a "connecting" dialog
