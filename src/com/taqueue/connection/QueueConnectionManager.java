@@ -19,6 +19,7 @@ package com.taqueue.connection;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.HttpEntity;
 import org.apache.http.params.HttpParams;
+import android.os.SystemClock;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.HttpResponse;
@@ -35,6 +36,7 @@ import java.io.Serializable;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.lang.Runnable;
 /**
  * Class that manages the connections to the queue server
  */
@@ -96,18 +98,23 @@ public class QueueConnectionManager implements java.io.Serializable{
                 //default to OK, we'll change in the event of an error
                 res.status = ConnectionStatus.OK;
                 try{
-                        //set up the timeout
-                        HttpParams httpParams = new BasicHttpParams();
-                        HttpConnectionParams.setConnectionTimeout(httpParams, CONNECTION_TIMEOUT);
-                        HttpConnectionParams.setSoTimeout(httpParams, CONNECTION_TIMEOUT);
                         //set up the connection
-                        DefaultHttpClient client = new DefaultHttpClient(httpParams);
+                        DefaultHttpClient client = new DefaultHttpClient();
+                        //set up the timeout
+                        HttpParams httpParams = client.getParams();
+                        HttpConnectionParams.setConnectionTimeout(httpParams,CONNECTION_TIMEOUT);
+                        HttpConnectionParams.setSoTimeout(httpParams,CONNECTION_TIMEOUT);
+
                         HttpPost post = new HttpPost(HOST+PATH);
                         //set up our POST values
                         post.setEntity(new UrlEncodedFormEntity(nvps,HTTP.UTF_8));
                         //send it along
                         ResponseHandler<String> handler = new BasicResponseHandler();
+                        connectionWatcher watcher = new connectionWatcher(post);
+                        Thread t = new Thread(watcher);
+                        t.start();
                         res.message = client.execute(post,handler);
+                        watcher.finished();
                         //and clean up
                         client.getConnectionManager().shutdown();
                 //if any exceptions are thrown return a connection error result
@@ -276,5 +283,21 @@ public class QueueConnectionManager implements java.io.Serializable{
         private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
                 in.defaultReadObject();
         }
-
+        private class connectionWatcher implements Runnable
+        {
+                public boolean isDone;
+                private HttpPost message;
+                public connectionWatcher(HttpPost toWatch){
+                        isDone = false;
+                        message = toWatch;
+                }
+                public void run(){
+                        SystemClock.sleep(CONNECTION_TIMEOUT);
+                        if(!isDone)
+                                message.abort();
+                }
+                public void finished(){
+                        isDone = true;
+                }
+        }
 }
