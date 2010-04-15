@@ -27,11 +27,36 @@ public class UpdateTask extends AsyncTask<Void,String,Void>{
         private TAQueueActivity activity;
         private TAQueue queue;
         private boolean loopForever;
+        public static final int DEFAULT_DELAY = 2500;
+        private int updateDelay;
+        /**
+         * Create an update task that updates forever and waits updateDelay between each update
+         * @param act The TAQueueActivity that should be used for callback on update
+         * @param m The QueueConnectionManager that should be used to send/receive messages
+         * @param queue The TAQueue that should be updated based on responses from the queue
+         * @param updateDelay delay between each update
+         */
+        public UpdateTask(TAQueueActivity act,QueueConnectionManager m, TAQueue queue,int updateDelay){
+                manager = m;
+                activity = act;
+                this.queue = queue;
+                this.loopForever = true;
+                this.updateDelay = updateDelay;
+        }
+        /**
+         * Create an update task. If loopForever is true it will loop forever waiting DEFAULT_DELAY between updates.
+         * Otherwise it will only run one update and then finish.
+         * @param act The TAQueueActivity that should be used for callback on update
+         * @param m The QueueConnectionManager that should be used to send/receive messages
+         * @param queue The TAQueue that should be updated based on responses from the queue
+         * @param loopForever if the update should loop forever.
+         */
         public UpdateTask(TAQueueActivity act,QueueConnectionManager m, TAQueue queue,boolean loopForever){
                 manager = m;
                 activity = act;
                 this.queue = queue;
                 this.loopForever = loopForever;
+                this.updateDelay = DEFAULT_DELAY;
         }
         @Override
         /**
@@ -47,8 +72,9 @@ public class UpdateTask extends AsyncTask<Void,String,Void>{
                         else
                                 message = res.status.toString();
                         publishProgress(message);
-                        //sleep for 2.5 seconds then do it again :D
-                        SystemClock.sleep(2500);
+                        //if we run this update loop repeatedly wait between each update
+                        if(loopForever)
+                                SystemClock.sleep(updateDelay);
                 }while(loopForever);
                 return null;
         }
