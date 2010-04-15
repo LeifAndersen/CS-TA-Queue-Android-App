@@ -79,6 +79,7 @@ public class TAQueueActivity extends ListActivity
          * The string prefixing machine names in the textview "Machine:" by default
          */
         private String machineStr;
+        private SimpleAdapter adapter;
         /**
          * Called whenever an update to the queue has happened, will then update the UI to reflect the changes
          */
@@ -116,8 +117,8 @@ public class TAQueueActivity extends ListActivity
                         itemsList.add(map);
                 }
                 //and display
-                SimpleAdapter sa = new SimpleAdapter(this,itemsList,R.layout.student_entry,new String[]{"name","machine"},new int[]{R.id.name,R.id.machine});
-                setListAdapter(sa);
+                adapter = new SimpleAdapter(this,itemsList,R.layout.student_entry,new String[]{"name","machine"},new int[]{R.id.name,R.id.machine});
+                setListAdapter(adapter);
         }
         @Override
         public void onCreate(Bundle savedInstanceState){
@@ -136,6 +137,9 @@ public class TAQueueActivity extends ListActivity
                         queue = (TAQueue) savedInstanceState.getSerializable("Queue");
                         
                         //spawn the update task
+                        if(updater != null){
+                                updater.cancel(true);
+                        }
                         updater = new UpdateTask(this,manager,queue,true);
                         updater.execute();
                         //finally, update the display based on our saved values
@@ -165,10 +169,21 @@ public class TAQueueActivity extends ListActivity
         public void onResume(){
                 //if the connection is good then start updating again
                 if(manager.isConnected()){
+                        if(updater != null)
+                                updater.cancel(true);
                         updater = new UpdateTask(this,manager,queue,true);
                         updater.execute();
                 }
                 super.onResume();
+        }
+        public void onDestroy(){
+                //remove all callbacks 
+                this.adapter = null;
+                if(updater != null){
+                        updater.cancel(true);
+                        updater = null;
+                }
+                super.onDestroy();
         }
         public void onStop(){
                 //if we are not looking at the queue no real point in keeping it up to date
@@ -195,8 +210,8 @@ public class TAQueueActivity extends ListActivity
                 //spawn a task to do the remove
                 new RemoveTask(manager,name,machine).execute();
                 //force a single update
-                updater = new UpdateTask(this,manager,queue,false);
-                updater.execute();
+                UpdateTask single = new UpdateTask(this,manager,queue,false);
+                single.execute();
         }
         /**
          * Called when the user presses the Activate button, activates the queue if the queue is connected
@@ -206,8 +221,8 @@ public class TAQueueActivity extends ListActivity
                 if(manager.isConnected()){
                         manager.activate();
                         //force a single update
-                        updater = new UpdateTask(this,manager,queue,false);
-                        updater.execute();
+                        UpdateTask single = new UpdateTask(this,manager,queue,false);
+                        single.execute();
                 }
         }
         /**
@@ -218,8 +233,8 @@ public class TAQueueActivity extends ListActivity
                 if(manager.isConnected()){
                         manager.freeze();
                         //force a single update
-                        updater = new UpdateTask(this,manager,queue,false);
-                        updater.execute();
+                        UpdateTask single = new UpdateTask(this,manager,queue,false);
+                        single.execute();
                 }
         }
         /**
@@ -230,8 +245,8 @@ public class TAQueueActivity extends ListActivity
                 if(manager.isConnected()){
                         manager.deactivate();
                         //force a single update
-                        updater = new UpdateTask(this,manager,queue,false);
-                        updater.execute();
+                        UpdateTask single = new UpdateTask(this,manager,queue,false);
+                        single.execute();
                 }
         }
         /**

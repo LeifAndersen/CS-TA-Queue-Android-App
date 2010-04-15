@@ -37,7 +37,7 @@ public class UpdateTask extends AsyncTask<Void,String,Void>{
          * @param updateDelay delay between each update
          */
         public UpdateTask(TAQueueActivity act,QueueConnectionManager m, TAQueue queue,int updateDelay){
-                manaer = m;
+                manager = m;
                 activity = act;
                 this.queue = queue;
                 this.loopForever = true;
