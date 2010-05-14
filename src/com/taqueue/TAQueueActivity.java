@@ -102,6 +102,7 @@ public class TAQueueActivity extends ListActivity
                                 break;
                         case STATE_UNCONNECTED:
                                 //we aren't connected yet, so don't even bother doing anything more[this shouldn't happen, but if it does...]
+				//TODO: Handle this error in a better way
                                 return;
                 }
                 //now update the section
@@ -127,7 +128,7 @@ public class TAQueueActivity extends ListActivity
                 //store the name and machine prefixes
                 nameStr = getResources().getString(R.string.student_name);
                 machineStr = getResources().getString(R.string.machine_name);
-                //load state if we have one(and we have connected
+                //load state if we have one(and we have connected)
                 if(savedInstanceState != null &&  savedInstanceState.containsKey("Connection Manager")){
                         //if we have a saved state then use our old values
                         setContentView(R.layout.queue);
@@ -177,7 +178,6 @@ public class TAQueueActivity extends ListActivity
                 super.onResume();
         }
         public void onDestroy(){
-                //remove all callbacks 
                 this.adapter = null;
                 if(updater != null){
                         updater.cancel(true);
@@ -187,7 +187,6 @@ public class TAQueueActivity extends ListActivity
         }
         public void onStop(){
                 //if we are not looking at the queue no real point in keeping it up to date
-                //TODO: decide if canceling is even worth it
                 if(updater != null){
                         updater.cancel(true);
                         updater = null;
