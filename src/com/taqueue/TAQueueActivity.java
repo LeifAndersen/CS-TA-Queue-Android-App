@@ -213,10 +213,17 @@ public class TAQueueActivity extends ListActivity
                 UpdateTask single = new UpdateTask(this,manager,queue,false);
                 single.execute();
         }
+	/**
+	 * Changes the state of the queue(if connected). Used for the activate/freeze/deactivate
+	 * buttons.
+	 * @param newState the state the queue should change to
+	 * If the queue is not connected then changeState will do nothing.
+	 */
 	private void changeState(QueueState newState){
 		//only try to change state if we are connected
 		if(!manager.isConnected())
 			return;
+		//change the state
 		switch(newState){
 			case STATE_ACTIVE:
                         	manager.activate();
