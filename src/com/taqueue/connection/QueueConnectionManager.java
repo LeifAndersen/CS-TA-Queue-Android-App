@@ -52,7 +52,7 @@ public class QueueConnectionManager implements java.io.Serializable{
         /**
          * Connection timeout in ms
          */
-        private static final int CONNECTION_TIMEOUT = 10000;
+        private static final int CONNECTION_TIMEOUT = 5000;
         /**
          * The 'section'(or class) that we want to be working with
          * @serial
