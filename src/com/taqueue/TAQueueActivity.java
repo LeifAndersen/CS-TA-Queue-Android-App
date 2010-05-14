@@ -213,41 +213,41 @@ public class TAQueueActivity extends ListActivity
                 UpdateTask single = new UpdateTask(this,manager,queue,false);
                 single.execute();
         }
+	private void changeState(QueueState newState){
+		//only try to change state if we are connected
+		if(!manager.isConnected())
+			return;
+		switch(newState){
+			case STATE_ACTIVE:
+                        	manager.activate();
+				break;
+			case STATE_INACTIVE:
+                        	manager.deactivate();
+				break;
+			case STATE_FROZEN:
+				manager.freeze();
+				break;
+		}
+		//cause a single update(helps sluggishness)
+		new UpdateTask(this,manager,queue,false).execute();
+	}
         /**
          * Called when the user presses the Activate button, activates the queue if the queue is connected
          */
         public void onActivateClick(View v){
-                //only try to activate if the connection is ok
-                if(manager.isConnected()){
-                        manager.activate();
-                        //force a single update
-                        UpdateTask single = new UpdateTask(this,manager,queue,false);
-                        single.execute();
-                }
+		this.changeState(QueueState.STATE_ACTIVE);
         }
         /**
          * Called when the user presses the Freeze buttons, freezes the queue if the queue is connected
          */
         public void onFreezeClick(View v){
-                //only try to freeze if the connection is ok
-                if(manager.isConnected()){
-                        manager.freeze();
-                        //force a single update
-                        UpdateTask single = new UpdateTask(this,manager,queue,false);
-                        single.execute();
-                }
+		this.changeState(QueueState.STATE_FROZEN);
         }
         /**
          * Called when the user presses the Deactivate buttons, deactivates the queue if the queue is connected
          */
         public void onDeactivateClick(View v){
-                //only try to deactivate if the connection is ok
-                if(manager.isConnected()){
-                        manager.deactivate();
-                        //force a single update
-                        UpdateTask single = new UpdateTask(this,manager,queue,false);
-                        single.execute();
-                }
+		this.changeState(QueueState.STATE_INACTIVE);
         }
         /**
          * Called when the user clicks the "Connect" button in the login screen
