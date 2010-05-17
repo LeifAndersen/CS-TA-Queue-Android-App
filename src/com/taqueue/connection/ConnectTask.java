@@ -16,14 +16,14 @@
 package com.taqueue.connection;
 import android.os.AsyncTask;
 import android.os.SystemClock;
-import com.taqueue.TAQueueActivity;
+import com.taqueue.LoginActivity;
 /**
  */
 public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
         private QueueConnectionManager manager;
         private String section;
         private String password;
-        private TAQueueActivity callback;
+        private LoginActivity callback;
         /**
          * ConnectTask constructor
          * @param callback the activity to call once the connection completes
@@ -31,7 +31,7 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
          * @param section Section to register
          * @param password Password for section's queue
          */
-        public ConnectTask(TAQueueActivity callback,QueueConnectionManager manager,String section, String password){
+        public ConnectTask(LoginActivity callback,QueueConnectionManager manager,String section, String password){
                 this.callback = callback;
                 this.manager = manager;
                 this.section = section;

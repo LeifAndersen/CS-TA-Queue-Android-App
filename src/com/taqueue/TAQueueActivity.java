@@ -41,23 +41,12 @@ import com.taqueue.queue.*;
 /**
  * Activity that handles our UI(and updating it)
  */
-public class TAQueueActivity extends ListActivity
-{
-        /*
-         * IDs for dialogs, see onCreateDialog for more info
-         */
-        public static final int DIALOG_CONNECTING = 0;
-        public static final int DIALOG_BAD_LOGIN = 1;
-        public static final int DIALOG_CONNECTION_ERROR=2;
+public class TAQueueActivity extends ListActivity{
 
         /**
          * File where preferences will be saved
          */
         private static final String PREFS="TAQueuePrefs";
-        /**
-         * Dialog showing the "please wait" while connecting, will be dismissed once the connectTask finishes
-         */
-        private ProgressDialog connectingDialog;
         /**
          * TAQueue containing the state of the queue(active/inactive/frozen and who is active)
          */
@@ -126,12 +115,12 @@ public class TAQueueActivity extends ListActivity
                 super.onCreate(savedInstanceState);
                 //setContentView(R.layout.login);
                 //store the name and machine prefixes
+                setContentView(R.layout.queue);
                 nameStr = getResources().getString(R.string.student_name);
                 machineStr = getResources().getString(R.string.machine_name);
                 //load state if we have one(and we have connected)
                 if(savedInstanceState != null &&  savedInstanceState.containsKey("Connection Manager")){
                         //if we have a saved state then use our old values
-                        setContentView(R.layout.queue);
                         //load the connection manager
                         manager = (QueueConnectionManager) savedInstanceState.getSerializable("Connection Manager");
                         //load the queue
@@ -145,25 +134,16 @@ public class TAQueueActivity extends ListActivity
                         updater.execute();
                         //finally, update the display based on our saved values
                         this.doUpdate();
-                }else{ //if we don't have a saved state then ask for login
-                        manager = new QueueConnectionManager();
+                }else{ //otherwise we were just created, get the bundle from the intent and extract the manager
                         queue = new TAQueue();
-                        setContentView(R.layout.login);
-
-                        //load the saved section/password
-                        SharedPreferences settings = getSharedPreferences(PREFS,0);
-                        String section = settings.getString("section","");
-                        String password = settings.getString("password","");
-                        //load if the save login check box is checked
-                        boolean isSaveChecked = settings.getBoolean("saveChecked",false);
-                        ((CheckBox)findViewById(R.id.saveCheckBox)).setChecked(isSaveChecked);
-                        //and set the EditText's text
-                        EditText sectionText = (EditText) findViewById(R.id.sectionInput);
-                        EditText passwordText = (EditText) findViewById(R.id.passwordInput);
-                        sectionText.setText(section);
-                        passwordText.setText(password);
-
-
+			Bundle b = this.getIntent().getExtras();
+			if(b == null){ //handle error
+			}
+			manager = (QueueConnectionManager) b.getSerializable("manager");
+			if(manager == null || !manager.isConnected()){//handle error
+			}
+                        updater = new UpdateTask(this,manager,queue,true);
+                        updater.execute();
                 }
 
         }
@@ -256,63 +236,6 @@ public class TAQueueActivity extends ListActivity
 		this.changeState(QueueState.STATE_INACTIVE);
         }
         /**
-         * Called when the user clicks the "Connect" button in the login screen
-         */
-        public void onConnectClick(View v){
-                //get the login info
-                String section = ((TextView)findViewById(R.id.sectionInput)).getText().toString();
-                String password = ((TextView)findViewById(R.id.passwordInput)).getText().toString();
-                //save the section/password to the preferences if the user wants, otherwise save "" for both
-                boolean save = ((CheckBox)findViewById(R.id.saveCheckBox)).isChecked();
-                SharedPreferences settings = getSharedPreferences(PREFS,0);
-                SharedPreferences.Editor editor = settings.edit();
-                editor.putString("section", (save ? section : ""));
-                editor.putString("password", (save ? password : ""));
-                editor.putBoolean("saveChecked",save);
-                //and save the settings
-                editor.commit();
-                //spawn a connect task
-                new ConnectTask(this,manager,section,password).execute();
-                //and spawn a "connecting" dialog
-                showDialog(DIALOG_CONNECTING);
-
-        }
-        /**
-         * Called when we want to create a dialog
-         * @param val the dialog to be created(see const definitions at the top of TAQueueActivity)
-         */
-        protected Dialog onCreateDialog(int val){
-                //builder for any alerts we need
-                AlertDialog.Builder builder= new AlertDialog.Builder(this);
-                //choose which dialog to make
-                switch(val){
-                        //dialog showing that the queue is connecting
-                        case DIALOG_CONNECTING:
-                                connectingDialog = ProgressDialog.show(this,"","Connecting. Please wait...",true,false);
-                                return connectingDialog;
-                        //alert dialog for bad password
-                        case DIALOG_BAD_LOGIN:
-                                builder.setMessage(getResources().getString(R.string.bad_password))
-                                .setPositiveButton("OK",new DialogInterface.OnClickListener(){
-                                        public void onClick(DialogInterface dialog, int id){
-                                                dialog.cancel();
-                                        }
-                                });
-                                return builder.create();
-                        //alert dialog for when there is an error connecting to the queue
-                        case DIALOG_CONNECTION_ERROR:
-                                builder.setMessage(getResources().getString(R.string.error_connecting))
-                                .setPositiveButton("OK",new DialogInterface.OnClickListener(){
-                                        public void onClick(DialogInterface dialog, int id){
-                                                dialog.cancel();
-                                        }
-                                });
-                                return builder.create();
-                }
-                //otherwise it was a bad value, return null
-                return null;
-        }
-        /**
          * Called when we need to save the app state, adds the connection manager to the bundle
          */
         protected void onSaveInstanceState(Bundle outState){
@@ -320,31 +243,6 @@ public class TAQueueActivity extends ListActivity
                 if(this.manager.isConnected()){
                         outState.putSerializable("Connection Manager",this.manager);
                         outState.putSerializable("Queue",this.queue);
-                }
-        }
-        /**
-         * Called when a ConnectTask completes
-         * @param status the status of the QueueConnection
-         */
-        public void onConnection(ConnectionStatus s){
-                //finish the progress dialog
-                this.connectingDialog.cancel();
-                removeDialog(DIALOG_CONNECTING);
-                ConnectionStatus status = s;
-                //if we connected start everything up
-                if(status == ConnectionStatus.OK){
-                        TextView statusView = (TextView) findViewById(R.id.status);
-                        setContentView(R.layout.queue);
-                        queue.setSection(manager.getSection());
-                        //spawn an updater that updates forever
-                        updater = new UpdateTask(this,manager,queue,true);
-                        updater.execute();
-                }else if(status == ConnectionStatus.BAD_PASSWORD){
-                        //show a bad password alert
-                        showDialog(DIALOG_BAD_LOGIN);
-                }else{
-                        //show a connection error alert
-                        showDialog(DIALOG_CONNECTION_ERROR);
                 }
         }
 }
