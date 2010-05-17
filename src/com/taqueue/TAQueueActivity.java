@@ -42,7 +42,10 @@ import com.taqueue.queue.*;
  * Activity that handles our UI(and updating it)
  */
 public class TAQueueActivity extends ListActivity{
-
+	/**
+	 * Dialog informing of a connection loss
+	 */
+	private static final int CONNECTION_LOSS_DIALOG = 1; 
         /**
          * File where preferences will be saved
          */
@@ -73,6 +76,9 @@ public class TAQueueActivity extends ListActivity{
          * Called whenever an update to the queue has happened, will then update the UI to reflect the changes
          */
         public void doUpdate(){
+		//if we are in the process of closing then ignore everything
+		if(updater == null)
+			return;
                 //first, update the state
                 TextView status = (TextView) findViewById(R.id.status);
                 //set the state text based on the queue state
@@ -90,8 +96,10 @@ public class TAQueueActivity extends ListActivity{
                                 status.setTextColor(this.getResources().getColor(R.drawable.frozen_color));
                                 break;
                         case STATE_UNCONNECTED:
-                                //we aren't connected yet, so don't even bother doing anything more[this shouldn't happen, but if it does...]
-				//TODO: Handle this error in a better way
+				//there was a connection error, tell the user and bail!
+				this.updater.cancel(true);
+				this.updater = null;
+				showDialog(CONNECTION_LOSS_DIALOG);
                                 return;
                 }
                 //now update the section
@@ -248,4 +256,28 @@ public class TAQueueActivity extends ListActivity{
                         outState.putSerializable("Queue",this.queue);
                 }
         }
+        /**
+         * Called when we want to create a dialog
+         * @param val the dialog to be created(see const definitions at the top)
+         */
+        protected Dialog onCreateDialog(int val){
+                //builder for any alerts we need
+                AlertDialog.Builder builder= new AlertDialog.Builder(this);
+                //choose which dialog to make
+                switch(val){
+			case CONNECTION_LOSS_DIALOG:
+                                builder.setMessage(getResources().getString(R.string.conn_loss))
+                                .setPositiveButton("OK",new DialogInterface.OnClickListener(){
+                                        public void onClick(DialogInterface dialog, int id){
+						dialog.cancel();
+						((Dialog)dialog).getOwnerActivity().finish();
+                                        }
+                                });
+                                return builder.create();
+                }
+                //otherwise it was a bad value, return null
+                return null;
+        }
+
+
 }

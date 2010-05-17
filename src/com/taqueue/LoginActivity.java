@@ -91,7 +91,7 @@ public class LoginActivity extends Activity{
         }
         /**
          * Called when we want to create a dialog
-         * @param val the dialog to be created(see const definitions at the top of TAQueueActivity)
+         * @param val the dialog to be created(see const definitions at the top)
          */
         protected Dialog onCreateDialog(int val){
                 //builder for any alerts we need
