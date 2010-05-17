@@ -138,10 +138,13 @@ public class TAQueueActivity extends ListActivity{
                         queue = new TAQueue();
 			Bundle b = this.getIntent().getExtras();
 			if(b == null){ //handle error
+				this.finish();
 			}
 			manager = (QueueConnectionManager) b.getSerializable("manager");
 			if(manager == null || !manager.isConnected()){//handle error
+				this.finish();
 			}
+			queue.setSection(manager.getSection());
                         updater = new UpdateTask(this,manager,queue,true);
                         updater.execute();
                 }
