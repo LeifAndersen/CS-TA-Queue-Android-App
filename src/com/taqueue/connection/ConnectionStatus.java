@@ -25,5 +25,5 @@ package com.taqueue.connection;
  * but the ConnectionManager is not yet connected
  */
 public enum ConnectionStatus{
-        OK,BAD_PASSWORD,CONNECTION_ERROR, SERV_ERROR, NOT_CONNECTED
+	OK,BAD_PASSWORD,CONNECTION_ERROR, SERV_ERROR, NOT_CONNECTED
 }
