@@ -16,6 +16,9 @@
 package com.taqueue.connection;
 import android.os.AsyncTask;
 import android.os.SystemClock;
+import android.app.ProgressDialog;
+import android.app.Dialog;
+import android.content.DialogInterface;
 import com.taqueue.LoginActivity;
 /**
 */
@@ -24,6 +27,7 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
 	private String section;
 	private String password;
 	private LoginActivity callback;
+	private Dialog connectDialog;
 	/**
 	 * ConnectTask constructor
 	 * @param callback the activity to call once the connection completes
@@ -37,6 +41,15 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
 		this.section = section;
 		this.password = password;
 	}
+	protected void onPreExecute(){
+		connectDialog = ProgressDialog.show(callback,"","Connecting, please wait...",true,true,
+			new DialogInterface.OnCancelListener(){
+				 public void onCancel(DialogInterface dialog){
+				  	ConnectTask.this.cancel(true);
+				  }
+			}
+			);
+	}
 	@Override
 	/**
 	 * Simply connects to the section and returns the result
@@ -45,6 +58,7 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
 		return manager.connectTo(section,password);
 	}
 	protected void onPostExecute(ConnectionStatus s){
+		connectDialog.dismiss();
 		callback.onConnection(s);
 	}
 }
