@@ -22,46 +22,46 @@ import java.io.IOException;
  * Class representing a student
  */
 public class Student implements java.io.Serializable{
-        /**
-         * Student name
-         * @serial
-         */
-        private String name;
-        /**
-         * Student machine
-         * @serial
-         */
-        private String machine;
-        /**
-         * Student Constructor
-         * @param name Name of the student
-         * @param machine machine the student is on
-         */
-        public Student(String name, String machine){
-                this.name = name;
-                this.machine = machine;
-        }
+	/**
+	 * Student name
+	 * @serial
+	 */
+	private String name;
+	/**
+	 * Student machine
+	 * @serial
+	 */
+	private String machine;
+	/**
+	 * Student Constructor
+	 * @param name Name of the student
+	 * @param machine machine the student is on
+	 */
+	public Student(String name, String machine){
+		this.name = name;
+		this.machine = machine;
+	}
 
-        /**
-         * Get the student name
-         * @return Name of the student
-         */
-        public String getName(){
-                return name;
-        }
-        
-        /**
-         * Get the machine the student is on
-         * @return Machine the student is at
-         */
-        public String getMachine(){
-                return machine;
-        }
-        /*Serializable methods*/
-        private void writeObject(java.io.ObjectOutputStream out) throws IOException{
-                out.defaultWriteObject();
-        }
-        private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
-                in.defaultReadObject();
-        }
+	/**
+	 * Get the student name
+	 * @return Name of the student
+	 */
+	public String getName(){
+		return name;
+	}
+
+	/**
+	 * Get the machine the student is on
+	 * @return Machine the student is at
+	 */
+	public String getMachine(){
+		return machine;
+	}
+	/*Serializable methods*/
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException{
+		out.defaultWriteObject();
+	}
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
+		in.defaultReadObject();
+	}
 }

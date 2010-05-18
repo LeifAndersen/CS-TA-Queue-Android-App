@@ -18,33 +18,33 @@ import android.os.AsyncTask;
 import android.os.SystemClock;
 import com.taqueue.LoginActivity;
 /**
- */
+*/
 public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
-        private QueueConnectionManager manager;
-        private String section;
-        private String password;
-        private LoginActivity callback;
-        /**
-         * ConnectTask constructor
-         * @param callback the activity to call once the connection completes
-         * @param manager QueueConnectionManager to use to connect
-         * @param section Section to register
-         * @param password Password for section's queue
-         */
-        public ConnectTask(LoginActivity callback,QueueConnectionManager manager,String section, String password){
-                this.callback = callback;
-                this.manager = manager;
-                this.section = section;
-                this.password = password;
-        }
-        @Override
-        /**
-         * Simply connects to the section and returns the result
-         */
-        protected ConnectionStatus doInBackground(Void... v){
-                return manager.connectTo(section,password);
-        }
-        protected void onPostExecute(ConnectionStatus s){
-                callback.onConnection(s);
-        }
+	private QueueConnectionManager manager;
+	private String section;
+	private String password;
+	private LoginActivity callback;
+	/**
+	 * ConnectTask constructor
+	 * @param callback the activity to call once the connection completes
+	 * @param manager QueueConnectionManager to use to connect
+	 * @param section Section to register
+	 * @param password Password for section's queue
+	 */
+	public ConnectTask(LoginActivity callback,QueueConnectionManager manager,String section, String password){
+		this.callback = callback;
+		this.manager = manager;
+		this.section = section;
+		this.password = password;
+	}
+	@Override
+	/**
+	 * Simply connects to the section and returns the result
+	 */
+	protected ConnectionStatus doInBackground(Void... v){
+		return manager.connectTo(section,password);
+	}
+	protected void onPostExecute(ConnectionStatus s){
+		callback.onConnection(s);
+	}
 }

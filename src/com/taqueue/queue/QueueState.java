@@ -15,8 +15,8 @@
  */
 package com.taqueue.queue;
 public enum QueueState{
-        STATE_ACTIVE, //the queue is active
-        STATE_INACTIVE, //the queue is inactive
-        STATE_FROZEN, //the queue is frozen
-        STATE_UNCONNECTED //the queue is unconnected for any reason
+	STATE_ACTIVE, //the queue is active
+	STATE_INACTIVE, //the queue is inactive
+	STATE_FROZEN, //the queue is frozen
+	STATE_UNCONNECTED //the queue is unconnected for any reason
 }

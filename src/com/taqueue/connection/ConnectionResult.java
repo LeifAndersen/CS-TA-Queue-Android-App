@@ -19,6 +19,6 @@ package com.taqueue.connection;
  * A class containing the results of a message to the queue, message will be null if status is not OK
  */
 public class ConnectionResult{
-        public ConnectionStatus status;
-        public String message;
+	public ConnectionStatus status;
+	public String message;
 }

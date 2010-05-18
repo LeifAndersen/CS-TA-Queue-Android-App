@@ -22,20 +22,20 @@ import com.taqueue.TAQueueActivity;
  * Handled using a task so that the UI doesn't lag in the event of connection issues
  */
 public class RemoveTask extends AsyncTask<Void,Void,Void>{
-        private QueueConnectionManager manager;
-        private String name,machine;
-        public RemoveTask(QueueConnectionManager m,String name, String machine){
-                manager = m;
-                this.name = name;
-                this.machine=machine;
-        }
-        @Override
-        /**
-         * Send the remove request to the server
-         */
-        protected Void doInBackground(Void... v){
-                manager.remove(name,machine);
-                //value is ignored right now due to the queue not sending us back anything worth while
-                return null;
-        }
+	private QueueConnectionManager manager;
+	private String name,machine;
+	public RemoveTask(QueueConnectionManager m,String name, String machine){
+		manager = m;
+		this.name = name;
+		this.machine=machine;
+	}
+	@Override
+	/**
+	 * Send the remove request to the server
+	 */
+	protected Void doInBackground(Void... v){
+		manager.remove(name,machine);
+		//value is ignored right now due to the queue not sending us back anything worth while
+		return null;
+	}
 }

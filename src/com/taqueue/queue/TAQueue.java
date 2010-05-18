@@ -24,89 +24,89 @@ import java.io.IOException;
  * Class that handles the state of the TA queue
  */
 public class TAQueue implements java.io.Serializable{
-        /**
-         * The state of the queue at this time
-         * @serial
-         */
-        private QueueState state;
+	/**
+	 * The state of the queue at this time
+	 * @serial
+	 */
+	private QueueState state;
 
-        /**
-         * The section the queue is listening to
-         * @serial
-         */
-        private String section;
-        
-        /**
-         * List of all the students, will be reset everytime an update happens
-         * @serial
-         */
-        private ArrayList<Student> students;
+	/**
+	 * The section the queue is listening to
+	 * @serial
+	 */
+	private String section;
 
-        public TAQueue(){
-                //setup defaults
-                this.section = "None";
-                this.state = QueueState.STATE_UNCONNECTED;
-                students = new ArrayList<Student>();
-        }
-        public void setSection(String newSection){
-                this.section = newSection;
-        }
-        /**
-         * Parses the message from the server and updates the queue state as needed
-         * @param message message from the server
-         */
-        public void parseUpdate(String message){
-                //messages are using \r\n, so split those away
-                String[] lines = message.split("\r\n");
-                //first line is the queue state
-                String state = lines[0].trim();
-                if(state.equals("The queue is active"))
-                        this.state = QueueState.STATE_ACTIVE;
-                else if(state.equals("The queue is inactive"))
-                        this.state = QueueState.STATE_INACTIVE;
-                else if(state.equals("The queue is frozen"))
-                        this.state = QueueState.STATE_FROZEN;
-                else //this shouldn't happen, but just incase
-                        this.state = QueueState.STATE_UNCONNECTED;
-                //and now re load the students list
-                students = new ArrayList<Student>();
-                for(int i=1;i<lines.length;i++){
-                        //split on '@' to get the name and machine
-                        //if there are more than 1 @ we assume it is part of the machine
-                        //there is no way to choose(because of the way the queue works)
-                        //name is in [0], machine in [1]
-                        String[] split = lines[i].split(" @ ",2);
-                        students.add(new Student(split[0],split[1]));
-                }
-        }
-        /**
-         * Get the list of students in the queue
-         * @return list of all students currently in the queue
-         */
-        public List<Student> getStudents(){
-                return this.students;
-        }
+	/**
+	 * List of all the students, will be reset everytime an update happens
+	 * @serial
+	 */
+	private ArrayList<Student> students;
 
-        /**
-         * Get the current state of the queue
-         * @return queue state
-         */
-        public QueueState getState(){
-                return this.state;
-        }
-        
-        /**
-         * Get the the queues section
-         * @return Section name
-         */
-        public String getSection(){
-                return this.section;
-        }
-        /*Serializable methods*/
-        private void writeObject(java.io.ObjectOutputStream out) throws IOException{
-                out.defaultWriteObject();
-        }
-        private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
-                in.defaultReadObject();
-        }
+	public TAQueue(){
+		//setup defaults
+		this.section = "None";
+		this.state = QueueState.STATE_UNCONNECTED;
+		students = new ArrayList<Student>();
+	}
+	public void setSection(String newSection){
+		this.section = newSection;
+	}
+	/**
+	 * Parses the message from the server and updates the queue state as needed
+	 * @param message message from the server
+	 */
+	public void parseUpdate(String message){
+		//messages are using \r\n, so split those away
+		String[] lines = message.split("\r\n");
+		//first line is the queue state
+		String state = lines[0].trim();
+		if(state.equals("The queue is active"))
+			this.state = QueueState.STATE_ACTIVE;
+		else if(state.equals("The queue is inactive"))
+			this.state = QueueState.STATE_INACTIVE;
+		else if(state.equals("The queue is frozen"))
+			this.state = QueueState.STATE_FROZEN;
+		else //this shouldn't happen, but just incase
+			this.state = QueueState.STATE_UNCONNECTED;
+		//and now re load the students list
+		students = new ArrayList<Student>();
+		for(int i=1;i<lines.length;i++){
+			//split on '@' to get the name and machine
+			//if there are more than 1 @ we assume it is part of the machine
+			//there is no way to choose(because of the way the queue works)
+			//name is in [0], machine in [1]
+			String[] split = lines[i].split(" @ ",2);
+			students.add(new Student(split[0],split[1]));
+		}
+	}
+	/**
+	 * Get the list of students in the queue
+	 * @return list of all students currently in the queue
+	 */
+	public List<Student> getStudents(){
+		return this.students;
+	}
+
+	/**
+	 * Get the current state of the queue
+	 * @return queue state
+	 */
+	public QueueState getState(){
+		return this.state;
+	}
+
+	/**
+	 * Get the the queues section
+	 * @return Section name
+	 */
+	public String getSection(){
+		return this.section;
+	}
+	/*Serializable methods*/
+	private void writeObject(java.io.ObjectOutputStream out) throws IOException{
+		out.defaultWriteObject();
+	}
+	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
+		in.defaultReadObject();
+	}
 }
