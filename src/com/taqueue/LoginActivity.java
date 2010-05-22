@@ -34,7 +34,7 @@ import android.os.Bundle;
 import com.taqueue.queue.*;
 import com.taqueue.connection.*;
 
-public class LoginActivity extends Activity{
+public class LoginActivity extends Activity implements ConnectCallbackInterface{
 
 	/*
 	 * IDs for dialogs, see onCreateDialog for more info
@@ -79,7 +79,7 @@ public class LoginActivity extends Activity{
 		//and save the settings
 		editor.commit();
 		//spawn a connect task
-		new ConnectTask(this,manager,section,password).execute();
+		new ConnectTask(this,manager,section,password,this).execute();
 
 	}
 	/**
@@ -117,7 +117,7 @@ public class LoginActivity extends Activity{
 	 * Called when a ConnectTask completes
 	 * @param status the status of the QueueConnection
 	 */
-	public void onConnection(ConnectionStatus s){
+	public void onConnect(ConnectionStatus s){
 		//finish the progress dialog
 		ConnectionStatus status = s;
 		//if we connected start everything up
