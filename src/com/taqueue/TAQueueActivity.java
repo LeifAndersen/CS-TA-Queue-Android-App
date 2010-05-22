@@ -155,6 +155,14 @@ public class TAQueueActivity extends ListActivity implements UpdateCallback{
 		}
 
 	}
+	public void onPause(){
+		//if we are not looking at the queue no real point in keeping it up to date
+		if(updater != null){
+			updater.cancel(true);
+			updater = null;
+		}
+		super.onPause();
+	}
 	public void onResume(){
 		//if the connection is good then start updating again
 		if(manager.isConnected()){
