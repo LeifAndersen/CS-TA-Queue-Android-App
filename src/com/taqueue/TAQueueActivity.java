@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.CheckBox;
 import android.content.SharedPreferences;
 import android.view.View;
-import com.taqueue.connection.*;
 import android.os.SystemClock;
 import java.util.ArrayList;
 import java.util.Map;
@@ -38,10 +37,11 @@ import android.app.AlertDialog.Builder;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import com.taqueue.queue.*;
+import com.taqueue.connection.*;
 /**
  * Activity that handles our UI(and updating it)
  */
-public class TAQueueActivity extends ListActivity{
+public class TAQueueActivity extends ListActivity implements UpdateCallback{
 	/**
 	 * Dialog informing of a connection loss
 	 */
@@ -75,7 +75,7 @@ public class TAQueueActivity extends ListActivity{
 	/**
 	 * Called whenever an update to the queue has happened, will then update the UI to reflect the changes
 	 */
-	public void doUpdate(){
+	public void onUpdate(UpdateTask task, QueueConnectionManager manager, TAQueue queue){
 		//if we are in the process of closing then ignore everything
 		if(updater == null)
 			return;
@@ -138,7 +138,7 @@ public class TAQueueActivity extends ListActivity{
 			updater = new UpdateTask(this,manager,queue,true);
 			updater.execute();
 			//finally, update the display based on our saved values
-			this.doUpdate();
+			this.onUpdate(null,manager,queue);
 		}else{ //otherwise we were just created, get the bundle from the intent and extract the manager
 			queue = new TAQueue();
 			Bundle b = this.getIntent().getExtras();
@@ -154,6 +154,14 @@ public class TAQueueActivity extends ListActivity{
 			updater.execute();
 		}
 
+	}
+	public void onPause(){
+		//if we are not looking at the queue no real point in keeping it up to date
+		if(updater != null){
+			updater.cancel(true);
+			updater = null;
+		}
+		super.onPause();
 	}
 	public void onResume(){
 		//if the connection is good then start updating again

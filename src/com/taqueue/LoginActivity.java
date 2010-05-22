@@ -34,23 +34,18 @@ import android.os.Bundle;
 import com.taqueue.queue.*;
 import com.taqueue.connection.*;
 
-public class LoginActivity extends Activity{
+public class LoginActivity extends Activity implements ConnectCallback{
 
 	/*
 	 * IDs for dialogs, see onCreateDialog for more info
 	 */
-	public static final int DIALOG_CONNECTING = 0;
-	public static final int DIALOG_BAD_LOGIN = 1;
-	public static final int DIALOG_CONNECTION_ERROR=2;
+	public static final int DIALOG_BAD_LOGIN = 0;
+	public static final int DIALOG_CONNECTION_ERROR=1;
 	/**
 	 * File where preferences will be saved
 	 */
 	private static final String PREFS="TAQueuePrefs";
 	private QueueConnectionManager manager;
-	/**
-	 * Dialog showing the "please wait" while connecting, will be dismissed once the connectTask finishes
-	 */
-	private ProgressDialog connectingDialog;
 
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
@@ -84,9 +79,7 @@ public class LoginActivity extends Activity{
 		//and save the settings
 		editor.commit();
 		//spawn a connect task
-		new ConnectTask(this,manager,section,password).execute();
-		//and spawn a "connecting" dialog
-		showDialog(DIALOG_CONNECTING);
+		new ConnectTask(this,manager,section,password,this).execute();
 
 	}
 	/**
@@ -98,11 +91,7 @@ public class LoginActivity extends Activity{
 		AlertDialog.Builder builder= new AlertDialog.Builder(this);
 		//choose which dialog to make
 		switch(val){
-			//dialog showing that the queue is connecting
-			case DIALOG_CONNECTING:
-				connectingDialog = ProgressDialog.show(this,"","Connecting. Please wait...",true,false);
-				return connectingDialog;
-				//alert dialog for bad password
+			//alert dialog for bad password
 			case DIALOG_BAD_LOGIN:
 				builder.setMessage(getResources().getString(R.string.bad_password))
 					.setPositiveButton("OK",new DialogInterface.OnClickListener(){
@@ -111,7 +100,7 @@ public class LoginActivity extends Activity{
 							}
 							});
 				return builder.create();
-				//alert dialog for when there is an error connecting to the queue
+			//alert dialog for when there is an error connecting to the queue
 			case DIALOG_CONNECTION_ERROR:
 				builder.setMessage(getResources().getString(R.string.error_connecting))
 					.setPositiveButton("OK",new DialogInterface.OnClickListener(){
@@ -126,13 +115,8 @@ public class LoginActivity extends Activity{
 	}
 	/**
 	 * Called when a ConnectTask completes
-	 * @param status the status of the QueueConnection
 	 */
-	public void onConnection(ConnectionStatus s){
-		//finish the progress dialog
-		this.connectingDialog.cancel();
-		removeDialog(DIALOG_CONNECTING);
-		ConnectionStatus status = s;
+	public void onConnect(ConnectTask task, ConnectionStatus status, QueueConnectionManager manager){
 		//if we connected start everything up
 		if(status == ConnectionStatus.OK){
 			//set up the bundle of stuff we need to pass to the queue
