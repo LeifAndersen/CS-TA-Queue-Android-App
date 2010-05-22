@@ -80,6 +80,6 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
 	}
 	protected void onPostExecute(ConnectionStatus s){
 		connectDialog.dismiss();
-		callback.onConnect(s);
+		callback.onConnect(this,s,manager);
 	}
 }

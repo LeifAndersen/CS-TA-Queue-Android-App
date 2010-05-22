@@ -20,7 +20,9 @@ package com.taqueue.connection;
 public interface ConnectCallback{
 	/**
 	 * Called by a ConnectTask once the ConnectTask has completed
-	 * @param ConnectionStatus s The result of the connection attempt
+	 * @param task The ConnectTask that resulted in the onConnect call
+	 * @param state The result of the connection attempt
+	 * @param manager The ConnectionManager used for the connection
 	 */
-	public void onConnect(ConnectionStatus s);
+	public void onConnect(ConnectTask task, ConnectionStatus state, QueueConnectionManager manager);
 }

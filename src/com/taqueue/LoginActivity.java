@@ -115,11 +115,8 @@ public class LoginActivity extends Activity implements ConnectCallback{
 	}
 	/**
 	 * Called when a ConnectTask completes
-	 * @param status the status of the QueueConnection
 	 */
-	public void onConnect(ConnectionStatus s){
-		//finish the progress dialog
-		ConnectionStatus status = s;
+	public void onConnect(ConnectTask task, ConnectionStatus status, QueueConnectionManager manager){
 		//if we connected start everything up
 		if(status == ConnectionStatus.OK){
 			//set up the bundle of stuff we need to pass to the queue
