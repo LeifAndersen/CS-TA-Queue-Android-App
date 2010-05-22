@@ -34,7 +34,7 @@ import android.os.Bundle;
 import com.taqueue.queue.*;
 import com.taqueue.connection.*;
 
-public class LoginActivity extends Activity implements ConnectCallbackInterface{
+public class LoginActivity extends Activity implements ConnectCallback{
 
 	/*
 	 * IDs for dialogs, see onCreateDialog for more info

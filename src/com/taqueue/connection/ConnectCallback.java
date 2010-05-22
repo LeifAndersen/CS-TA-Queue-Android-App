@@ -17,7 +17,7 @@ package com.taqueue.connection;
 /**
  * Interface required for ConnectTasks' onConnect callback
  */
-public interface ConnectCallbackInterface{
+public interface ConnectCallback{
 	/**
 	 * Called by a ConnectTask once the ConnectTask has completed
 	 * @param ConnectionStatus s The result of the connection attempt

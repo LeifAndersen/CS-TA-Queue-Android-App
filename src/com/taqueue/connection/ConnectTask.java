@@ -27,7 +27,7 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
 	private QueueConnectionManager manager;
 	private String section;
 	private String password;
-	private ConnectCallbackInterface callback;
+	private ConnectCallback callback;
 	private Context appContext;
 	private Dialog connectDialog;
 	/**
@@ -38,7 +38,7 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
 	 * @param password Password for section's queue
 	 * @param displayContext the context to use to draw the progress dialog
 	 */
-	public ConnectTask(ConnectCallbackInterface callback,QueueConnectionManager manager,String section, String password, Context displayContext){
+	public ConnectTask(ConnectCallback callback,QueueConnectionManager manager,String section, String password, Context displayContext){
 		this.callback = callback;
 		this.manager = manager;
 		this.section = section;
@@ -53,7 +53,7 @@ public class ConnectTask extends AsyncTask<Void,Void,ConnectionStatus>{
 	 * @param section Section to register
 	 * @param password Password for section's queue
 	 */
-	public ConnectTask(ConnectCallbackInterface callback,QueueConnectionManager manager,String section, String password){
+	public ConnectTask(ConnectCallback callback,QueueConnectionManager manager,String section, String password){
 		this.callback = callback;
 		this.manager = manager;
 		this.section = section;
