@@ -26,6 +26,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.client.HttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.client.ResponseHandler;
@@ -110,7 +111,7 @@ public class QueueConnectionManager implements java.io.Serializable{
 			post.setEntity(new UrlEncodedFormEntity(nvps,HTTP.UTF_8));
 			//send it along
 			ResponseHandler<String> handler = new BasicResponseHandler();
-			connectionWatcher watcher = new connectionWatcher(post);
+			connectionWatcher watcher = new connectionWatcher(client);
 			Thread t = new Thread(watcher);
 			t.start();
 			res.message = client.execute(post,handler);
@@ -286,15 +287,15 @@ public class QueueConnectionManager implements java.io.Serializable{
 	private class connectionWatcher implements Runnable
 	{
 		public boolean isDone;
-		private HttpPost message;
-		public connectionWatcher(HttpPost toWatch){
+		private HttpClient message;
+		public connectionWatcher(HttpClient toWatch){
 			isDone = false;
 			message = toWatch;
 		}
 		public void run(){
 			SystemClock.sleep(CONNECTION_TIMEOUT);
 			if(!isDone)
-				message.abort();
+				message.getConnectionManager().shutdown();
 		}
 		public void finished(){
 			isDone = true;
