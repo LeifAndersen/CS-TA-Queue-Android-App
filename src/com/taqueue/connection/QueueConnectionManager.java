@@ -98,15 +98,15 @@ public class QueueConnectionManager implements java.io.Serializable{
 		ConnectionResult res = new ConnectionResult();
 		//default to OK, we'll change in the event of an error
 		res.status = ConnectionStatus.OK;
+		HttpPost post = new HttpPost(HOST+PATH);
+		DefaultHttpClient client = new DefaultHttpClient();
 		try{
 			//set up the connection
-			DefaultHttpClient client = new DefaultHttpClient();
 			//set up the timeout
 			HttpParams httpParams = client.getParams();
 			HttpConnectionParams.setConnectionTimeout(httpParams,CONNECTION_TIMEOUT);
 			HttpConnectionParams.setSoTimeout(httpParams,CONNECTION_TIMEOUT);
 
-			HttpPost post = new HttpPost(HOST+PATH);
 			//set up our POST values
 			post.setEntity(new UrlEncodedFormEntity(nvps,HTTP.UTF_8));
 			//send it along
@@ -117,12 +117,15 @@ public class QueueConnectionManager implements java.io.Serializable{
 			res.message = client.execute(post,handler);
 			watcher.finished();
 			//and clean up
-			client.getConnectionManager().shutdown();
 			//if any exceptions are thrown return a connection error result
 		}catch(Exception e){
 			res.status = ConnectionStatus.CONNECTION_ERROR;
 			res.message = null;
 		}
+		try{
+			client.getConnectionManager().shutdown();
+			post.abort();
+		}catch(Exception e){}
 		return res;
 	}
 	/**
