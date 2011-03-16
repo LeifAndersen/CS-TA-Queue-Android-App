@@ -31,6 +31,11 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.params.BasicHttpParams;
 import java.util.ArrayList;
 import java.util.List;
 import java.io.Serializable;
@@ -38,6 +43,7 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
 import java.lang.Runnable;
+import java.util.concurrent.TimeUnit;
 /**
  * Class that manages the connections to the queue server
  */
@@ -74,6 +80,11 @@ public class QueueConnectionManager implements java.io.Serializable{
 	private boolean connected;
 
 	/**
+	 * Manager for the connections to the server
+	 */
+	private transient ThreadSafeClientConnManager manager;
+
+	/**
 	 * QueueConnectionManager constructor
 	 */
 	public QueueConnectionManager(){
@@ -99,19 +110,24 @@ public class QueueConnectionManager implements java.io.Serializable{
 		//default to OK, we'll change in the event of an error
 		res.status = ConnectionStatus.OK;
 		HttpPost post = new HttpPost(HOST+PATH);
-		DefaultHttpClient client = new DefaultHttpClient();
+		//DefaultHttpClient client = new DefaultHttpClient();
+		//set up the timeout
+		HttpParams httpParams = new BasicHttpParams();
+		HttpConnectionParams.setConnectionTimeout(httpParams,CONNECTION_TIMEOUT);
+		HttpConnectionParams.setSoTimeout(httpParams,CONNECTION_TIMEOUT);
+		// set up the connection manager if needed
+		if(manager == null) {
+			SchemeRegistry registry = new SchemeRegistry();
+			registry.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
+			manager = new ThreadSafeClientConnManager(httpParams, registry);
+		}
+		DefaultHttpClient client = new DefaultHttpClient(manager,httpParams);
 		try{
-			//set up the connection
-			//set up the timeout
-			HttpParams httpParams = client.getParams();
-			HttpConnectionParams.setConnectionTimeout(httpParams,CONNECTION_TIMEOUT);
-			HttpConnectionParams.setSoTimeout(httpParams,CONNECTION_TIMEOUT);
-
 			//set up our POST values
 			post.setEntity(new UrlEncodedFormEntity(nvps,HTTP.UTF_8));
 			//send it along
 			ResponseHandler<String> handler = new BasicResponseHandler();
-			connectionWatcher watcher = new connectionWatcher(client);
+			connectionWatcher watcher = new connectionWatcher(post);
 			Thread t = new Thread(watcher);
 			t.start();
 			res.message = client.execute(post,handler);
@@ -121,11 +137,9 @@ public class QueueConnectionManager implements java.io.Serializable{
 		}catch(Exception e){
 			res.status = ConnectionStatus.CONNECTION_ERROR;
 			res.message = null;
-		}
-		try{
-			client.getConnectionManager().shutdown();
+		} finally {
 			post.abort();
-		}catch(Exception e){}
+		}
 		return res;
 	}
 	/**
@@ -285,20 +299,21 @@ public class QueueConnectionManager implements java.io.Serializable{
 	 * NOTE: As of now we don't verify that the data we read is sane
 	 */
 	private void readObject(java.io.ObjectInputStream in) throws IOException, ClassNotFoundException{
+		this.manager = null;
 		in.defaultReadObject();
 	}
 	private class connectionWatcher implements Runnable
 	{
 		public boolean isDone;
-		private HttpClient message;
-		public connectionWatcher(HttpClient toWatch){
+		private HttpPost message;
+		public connectionWatcher(HttpPost toWatch){
 			isDone = false;
 			message = toWatch;
 		}
 		public void run(){
 			SystemClock.sleep(CONNECTION_TIMEOUT);
 			if(!isDone)
-				message.getConnectionManager().shutdown();
+				message.abort();
 		}
 		public void finished(){
 			isDone = true;
