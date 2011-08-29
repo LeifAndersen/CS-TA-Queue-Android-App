@@ -51,7 +51,7 @@ public class QueueConnectionManager implements java.io.Serializable{
 	/**
 	 * The hostname where the queue is hosted
 	 */
-	private static final String HOST = "http://kodos.eng.utah.edu";
+	private static final String HOST = "http://tomcat.eng.utah.edu";
 	/**
 	 * The path to the servlet on the host
 	 */
