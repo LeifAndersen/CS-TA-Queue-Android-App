@@ -57,7 +57,7 @@ public class TAQueue implements java.io.Serializable{
 	 */
 	public void parseUpdate(String message){
 		//messages are using \r\n, so split those away
-		String[] lines = message.split("\r\n");
+		String[] lines = message.split("\n");
 		//first line is the queue state
 		String state = lines[0].trim();
 		if(state.equals("The queue is active"))
