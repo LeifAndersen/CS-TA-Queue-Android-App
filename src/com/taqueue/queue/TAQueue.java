@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Chad Brubaker
+ * Copyright 2010 Chad Brubaker, Leif Andersen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,11 +42,18 @@ public class TAQueue implements java.io.Serializable{
 	 */
 	private ArrayList<Student> students;
 
+	/**
+	 * List of students in the previous update, to test to see if there are new students.
+	 * @serial
+	 */
+	private ArrayList<Student> prevStudents;
+	
 	public TAQueue(){
 		//setup defaults
 		this.section = "None";
 		this.state = QueueState.STATE_UNCONNECTED;
 		students = new ArrayList<Student>();
+		prevStudents = new ArrayList<Student>();
 	}
 	public void setSection(String newSection){
 		this.section = newSection;
@@ -69,6 +76,7 @@ public class TAQueue implements java.io.Serializable{
 		else //this shouldn't happen, but just incase
 			this.state = QueueState.STATE_UNCONNECTED;
 		//and now re load the students list
+		prevStudents = students;
 		students = new ArrayList<Student>();
 		for(int i=1;i<lines.length;i++){
 			//split on '@' to get the name and machine
@@ -87,6 +95,14 @@ public class TAQueue implements java.io.Serializable{
 		return this.students;
 	}
 
+	/**
+	 * Get the list of all students previous to the most recent updates
+	 * @return list of all students currently in the queue
+	 */
+	public List<Student> getPreviousStudents(){
+		return this.prevStudents;
+	}
+	
 	/**
 	 * Get the current state of the queue
 	 * @return queue state

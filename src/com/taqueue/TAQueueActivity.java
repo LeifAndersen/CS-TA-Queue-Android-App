@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Chad Brubaker
+ * Copyright 2010 Chad Brubaker, Leif Andersen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,29 +15,32 @@
  */
 package com.taqueue;
 
-import android.app.ListActivity;
-import android.content.res.Resources;
-import android.os.Bundle;
-import android.widget.SimpleAdapter;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.EditText;
-import android.widget.CheckBox;
-import android.content.SharedPreferences;
-import android.view.View;
-import android.os.SystemClock;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
-import android.util.Log;
-import android.app.Dialog;
-import android.app.ProgressDialog;
+import java.util.Map;
+
 import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
+import android.app.Dialog;
+import android.app.ListActivity;
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
-import com.taqueue.queue.*;
-import com.taqueue.connection.*;
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.RelativeLayout;
+import android.widget.SimpleAdapter;
+import android.widget.TextView;
+
+import com.taqueue.connection.QueueConnectionManager;
+import com.taqueue.connection.RemoveTask;
+import com.taqueue.connection.UpdateCallback;
+import com.taqueue.connection.UpdateTask;
+import com.taqueue.queue.QueueState;
+import com.taqueue.queue.Student;
+import com.taqueue.queue.TAQueue;
 /**
  * Activity that handles our UI(and updating it)
  */
@@ -72,6 +75,14 @@ public class TAQueueActivity extends ListActivity implements UpdateCallback{
 	 */
 	private String machineStr;
 	private SimpleAdapter adapter;
+	/**
+	 * Notification manager for status bar notifications
+	 */
+	private NotificationManager mNotificationManager;
+	/**
+	 * Notification integer for the notification manager
+	 */
+	private static final int NEW_STUDENT_ID = 1;
 	/**
 	 * Called whenever an update to the queue has happened, will then update the UI to reflect the changes
 	 */
@@ -117,11 +128,25 @@ public class TAQueueActivity extends ListActivity implements UpdateCallback{
 		//and display
 		adapter = new SimpleAdapter(this,itemsList,R.layout.student_entry,new String[]{"name","machine"},new int[]{R.id.name,R.id.machine});
 		setListAdapter(adapter);
+		//if new students added, pop up a message
+		if(queue.getStudents().size() > queue.getPreviousStudents().size()) {
+			Map<String, String> student = itemsList.get(itemsList.size() - 1);
+			CharSequence tickerText = student.get("name");
+			Notification notification = new Notification(R.drawable.icon_grey_512, tickerText, System.currentTimeMillis());
+			CharSequence contentTitle = student.get("name");
+			CharSequence contentText = student.get("machine");
+			Intent notificationIntent = new Intent(this, LoginActivity.class);
+			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+			notification.setLatestEventInfo(getApplicationContext(), contentTitle, contentText, contentIntent);
+			notification.flags |= Notification.FLAG_AUTO_CANCEL;
+			mNotificationManager.notify(NEW_STUDENT_ID, notification);
+		}
 	}
 	@Override
 	public void onCreate(Bundle savedInstanceState){
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.queue);
+		mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		//store the name and machine prefixes
 		nameStr = getResources().getString(R.string.student_name);
 		machineStr = getResources().getString(R.string.machine_name);
