@@ -139,6 +139,9 @@ public class TAQueueActivity extends ListActivity implements UpdateCallback{
 			PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 			notification.setLatestEventInfo(getApplicationContext(), contentTitle, contentText, contentIntent);
 			notification.flags |= Notification.FLAG_AUTO_CANCEL;
+			notification.defaults |= Notification.DEFAULT_SOUND;
+			notification.defaults |= Notification.DEFAULT_VIBRATE;
+			notification.defaults |= Notification.DEFAULT_LIGHTS;
 			mNotificationManager.notify(NEW_STUDENT_ID, notification);
 		}
 	}
